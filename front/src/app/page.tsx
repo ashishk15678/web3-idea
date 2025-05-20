@@ -1,103 +1,161 @@
-import Image from "next/image";
+import Link from "next/link";
+import { ArrowRight, CheckCircle2, Space } from "lucide-react";
+
+import { Button } from "@/components/ui/button";
+import { ConnectWalletButton } from "@/components/connect-wallet-button";
+import { Navbar } from "@/components/navbar";
+import { Footer } from "@/components/footer";
+import { SpotlightEffect } from "@/components/spotlight-effect";
+import { LogoCloud } from "@/components/logo-cloud";
+import { FeatureSection } from "@/components/feature-section";
+import { TestimonialSection } from "@/components/testimonial-section";
+import { SpaceBackground } from "@/components/background/space-background";
 
 export default function Home() {
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              src/app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+    <div className="min-h-screen bg-white">
+      <Navbar />
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
+      <main>
+        {/* Hero Section - Clerk-style with Spotlight */}
+        <section className="relative overflow-hidden py-20 md:py-32">
+          <div className="absolute inset-0 -z-10">
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#f8f9fa,#ffffff,#f8f9fa)]"></div>
+            <div className="absolute bottom-0 left-0 right-0 top-0 bg-[radial-gradient(circle_800px_at_100%_200px,rgba(240,240,240,0.6),transparent)]"></div>
+          </div>
+
+          <SpotlightEffect className="z-10" />
+
+          <div className="container relative z-20 mx-auto px-4 border-zinc-100 border-2 py-20 rounded-[80px]">
+            <SpaceBackground />
+            <div className="mx-auto max-w-3xl text-center">
+              <div className="mb-6 inline-flex items-center rounded-full border border-gray-200 bg-white px-3 py-1 text-sm shadow-sm">
+                <span className="mr-1 rounded-full bg-black px-1.5 py-0.5 text-[10px] font-medium text-white">
+                  NEW
+                </span>
+                <span className="text-gray-600">
+                  Introducing IdeaX Trading Platform
+                </span>
+              </div>
+
+              <h1 className="mb-6 text-4xl font-bold tracking-tight text-black md:text-6xl">
+                The Web3 Platform for Trading Intellectual Capital
+              </h1>
+
+              <p className="mb-10 text-lg text-gray-600 md:text-xl">
+                IdeaX is the first decentralized marketplace that lets you
+                invest in ideas before they become reality. Trade intellectual
+                property like never before.
+              </p>
+
+              <div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
+                <Button
+                  asChild
+                  size="lg"
+                  className="rounded-full px-8 py-6 text-base font-medium"
+                >
+                  <Link href="/ideas">
+                    Explore Ideas <ArrowRight className="ml-2 h-4 w-4" />
+                  </Link>
+                </Button>
+                <ConnectWalletButton
+                  variant="outline"
+                  size="lg"
+                  className="rounded-full px-8 py-6 text-base font-medium"
+                />
+              </div>
+
+              <div className="mt-10 flex items-center justify-center gap-2 text-sm text-gray-500">
+                <CheckCircle2 className="h-4 w-4 text-black" />
+                <span>No credit card required</span>
+                <span className="mx-2">•</span>
+                <CheckCircle2 className="h-4 w-4 text-black" />
+                <span>Secure blockchain transactions</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* Logo Cloud - Like Clerk */}
+        <section className="border-y border-gray-100 bg-gray-50 py-16">
+          <div className="container mx-auto px-4">
+            <p className="mb-8 text-center text-sm font-medium text-gray-500 uppercase tracking-wider">
+              Trusted by innovators worldwide
+            </p>
+            <LogoCloud />
+          </div>
+        </section>
+
+        {/* Feature Section 1 - Like Clerk */}
+        <FeatureSection
+          title="Discover and Trade Innovative Ideas"
+          description="Our platform connects idea creators with investors in a secure, transparent marketplace powered by blockchain technology."
+          features={[
+            "Access to exclusive intellectual property",
+            "Secure blockchain transactions",
+            "Real-time market data and analytics",
+            "Direct connection with idea creators",
+          ]}
+          image="/image.png"
+          imageSide="right"
+        />
+
+        {/* Feature Section 2 - Like Clerk */}
+        <FeatureSection
+          title="Build Your Intellectual Portfolio"
+          description="Diversify your investments with early-stage ideas across multiple industries and track your portfolio's performance in real-time."
+          features={[
+            "Portfolio analytics and performance tracking",
+            "Customizable watchlists and alerts",
+            "Detailed idea metrics and projections",
+            "Historical performance data",
+          ]}
+          imageSide="left"
+          className="bg-gray-50"
+        />
+
+        {/* Feature Section 3 - Like Clerk */}
+        <FeatureSection
+          title="Monetize Your Intellectual Capital"
+          description="For creators, IdeaX provides a platform to monetize your ideas before they even reach development, connecting you with investors worldwide."
+          features={[
+            "Simple idea submission process",
+            "Intellectual property protection",
+            "Direct investor communication",
+            "Transparent revenue sharing",
+          ]}
+          imageSide="right"
+        />
+
+        {/* Testimonials - Like Clerk */}
+        <TestimonialSection />
+
+        {/* CTA Section - Like Clerk */}
+        <section className="py-24 bg-gray-50">
+          <div className="container mx-auto px-4">
+            <div className="mx-auto max-w-3xl text-center">
+              <h2 className="mb-6 text-3xl font-bold text-black md:text-4xl">
+                Ready to start trading on the future?
+              </h2>
+              <p className="mb-10 text-lg text-gray-600">
+                Join thousands of traders and innovators on our platform today
+                and be part of the intellectual capital revolution.
+              </p>
+              <Button
+                asChild
+                size="lg"
+                className="rounded-full px-8 py-6 text-base font-medium"
+              >
+                <Link href="/ideas">
+                  Get Started Now <ArrowRight className="ml-2 h-4 w-4" />
+                </Link>
+              </Button>
+            </div>
+          </div>
+        </section>
       </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+
+      <Footer />
     </div>
   );
 }

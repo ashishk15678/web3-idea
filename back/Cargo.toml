@@ -1,12 +1,18 @@
 [package]
-name = "back"
+name = "idea_market"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-actix-web = "4"
+actix-web = "4.4"
+actix-cors = "0.6"
+lazy_static = "1.4"
 solana-client = "1.18.11"
 solana-sdk = "1.18.11"
-spl-token = "4.0.1"
+spl-token = "4.0.0"
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
+deadpool-postgres = { version = "0.14.1", features = ["rt_tokio_1"] }
+tokio = { version = "1.36", features = ["full"] }
+chrono = { version = "0.4", features = ["serde"] }
+tokio-postgres = { version = "0.7", features = ["runtime"] }
