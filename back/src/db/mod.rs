@@ -1,7 +1,7 @@
 use chrono::{DateTime, TimeZone, Utc};
 use deadpool_postgres::{Client, Config, Pool, Runtime};
 use serde::{Deserialize, Serialize};
-use tokio_postgres::NoTls;
+use tokio_postgres::{types::ToSql, Error, NoTls};
 
 pub type PgPool = Pool;
 
@@ -48,7 +48,9 @@ pub struct User {
     id: Option<String>,
     username: String,
     wallet_address: String,
+    category: Option<String>,
     created_at: Option<DateTime<Utc>>,
+    updated_at: Option<DateTime<Utc>>,
 }
 
 impl User {
@@ -57,7 +59,43 @@ impl User {
             id: None,
             username,
             wallet_address,
+            category: None,
             created_at: None,
+            updated_at: None,
+        }
+    }
+}
+
+impl Idea {
+    pub fn new(
+        title: String,
+        description: String,
+        creator_id: String,
+        category: String,
+        initial_price: f64,
+        target_price: f64,
+        timeframe: String,
+        risk_level: i32,
+        market_size: String,
+        competitive_advantage: String,
+    ) -> Self {
+        Self {
+            id: None,
+            title,
+            description,
+            creator_id,
+            category,
+            initial_price,
+            target_price,
+            timeframe,
+            risk_level,
+            market_size,
+            competitive_advantage,
+            status: "active".to_string(),
+            resolution_outcome: None,
+            created_at: Some(Utc::now()),
+            updated_at: Some(Utc::now()),
+            resolved_at: None,
         }
     }
 }
@@ -132,6 +170,33 @@ pub async fn getGlobalClient() -> Result<Client, DbError> {
     Ok(client)
 }
 
+// pub async fn createIdea(idea: Idea) -> Result<Idea, DbError> {
+//     let client = getGlobalClient().await?;
+//     let result = client.query_one(
+//         "INSERT INTO ideas (title, description, creator_id, category, initial_price, target_price, timeframe, risk_level, market_size, competitive_advantage, status) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, created_at::text, updated_at::text",
+//         &[&idea.title, &idea.description, &idea.creator_id, &idea.category, &idea.initial_price, &idea.target_price, &idea.timeframe, &idea.risk_level, &idea.market_size, &idea.competitive_advantage, &idea.status],
+//     ).await?;
+
+//     Ok(Idea {
+//         id: Some(result.get("id")),
+//         title: idea.title,
+//         description: idea.description,
+//         creator_id: idea.creator_id,
+//         category: idea.category,
+//         initial_price: idea.initial_price,
+//         target_price: idea.target_price,
+//         timeframe: idea.timeframe,
+//         risk_level: idea.risk_level,
+//         market_size: idea.market_size,
+//         competitive_advantage: idea.competitive_advantage,
+//         status: idea.status,
+//         resolution_outcome: None,
+//         created_at: parse_timestamp(&result, "created_at"),
+//         updated_at: parse_timestamp(&result, "updated_at"),
+//         resolved_at: None,
+//     })
+// }
+
 pub async fn createUser(user: User) -> Result<User, DbError> {
     // Validate input
     if user.username.trim().is_empty() {
@@ -173,16 +238,18 @@ pub async fn createUser(user: User) -> Result<User, DbError> {
 
     let result = client
         .query_one(
-            "INSERT INTO users (username, wallet_address) VALUES ($1, $2) RETURNING id, created_at::text",
-            &[&user.username, &user.wallet_address],
+            "INSERT INTO users (username, wallet_address, category) VALUES ($1, $2, $3) RETURNING id, username, wallet_address, category, created_at, updated_at",
+            &[&user.username, &user.wallet_address, &user.category],
         )
         .await?;
 
     Ok(User {
         id: Some(result.get("id")),
-        username: user.username,
-        wallet_address: user.wallet_address,
+        username: result.get("username"),
+        wallet_address: result.get("wallet_address"),
+        category: result.get("category"),
         created_at: parse_timestamp(&result, "created_at"),
+        updated_at: parse_timestamp(&result, "updated_at"),
     })
 }
 
@@ -190,7 +257,7 @@ pub async fn getAllUsers() -> Result<Vec<User>, DbError> {
     let client = getGlobalClient().await?;
     let result = client
         .query(
-            "SELECT id, username, wallet_address, created_at::text FROM users ORDER BY created_at DESC",
+            "SELECT id, username, wallet_address, category, created_at::text, updated_at::text FROM users ORDER BY created_at DESC",
             &[],
         )
         .await?;
@@ -201,7 +268,9 @@ pub async fn getAllUsers() -> Result<Vec<User>, DbError> {
             id: Some(row.get("id")),
             username: row.get("username"),
             wallet_address: row.get("wallet_address"),
+            category: row.get("category"),
             created_at: parse_timestamp(&row, "created_at"),
+            updated_at: parse_timestamp(&row, "updated_at"),
         })
         .collect())
 }
@@ -216,7 +285,7 @@ pub async fn getUserByWalletAddress(wallet_address: String) -> Result<User, DbEr
     let client = getGlobalClient().await?;
     let result = client
         .query_opt(
-            "SELECT id, username, wallet_address, created_at::text FROM users WHERE wallet_address = $1",
+            "SELECT id, username, wallet_address, category, created_at::text, updated_at::text FROM users WHERE wallet_address = $1",
             &[&wallet_address],
         )
         .await?;
@@ -226,7 +295,9 @@ pub async fn getUserByWalletAddress(wallet_address: String) -> Result<User, DbEr
             id: Some(row.get("id")),
             username: row.get("username"),
             wallet_address: row.get("wallet_address"),
+            category: row.get("category"),
             created_at: parse_timestamp(&row, "created_at"),
+            updated_at: parse_timestamp(&row, "updated_at"),
         }),
         None => Err(DbError::NotFound(format!(
             "User with wallet address {} not found",
@@ -605,4 +676,49 @@ pub async fn getIdeaStats(idea_id: &str) -> Result<serde_json::Value, DbError> {
         "min_rate": result.get::<_, f64>("min_rate"),
         "max_rate": result.get::<_, f64>("max_rate")
     }))
+}
+
+pub async fn update_user(
+    client: &Client,
+    wallet_address: &str,
+    username: Option<&str>,
+    category: Option<&str>,
+) -> Result<User, DbError> {
+    let mut updates = Vec::new();
+    let mut params: Vec<&(dyn ToSql + Sync)> = Vec::new();
+    let mut param_count = 1;
+
+    if let Some(username) = username {
+        updates.push(format!("username = ${}", param_count));
+        params.push(&username as &(dyn ToSql + Sync));
+        param_count += 1;
+    }
+
+    if let Some(category) = category {
+        updates.push(format!("category = ${}", param_count));
+        params.push(&category as &(dyn ToSql + Sync));
+        param_count += 1;
+    }
+
+    if updates.is_empty() {
+        return Err(DbError::ValidationError("No fields to update".into()));
+    }
+
+    params.push(&wallet_address as &(dyn ToSql + Sync));
+    let query = format!(
+        "UPDATE users SET {} WHERE wallet_address = ${} RETURNING id, username, wallet_address, category, created_at, updated_at",
+        updates.join(", "),
+        param_count
+    );
+
+    let user = client.query_one(&query, &params).await?;
+
+    Ok(User {
+        id: user.get("id"),
+        username: user.get("username"),
+        wallet_address: user.get("wallet_address"),
+        category: user.get("category"),
+        created_at: user.get("created_at"),
+        updated_at: user.get("updated_at"),
+    })
 }
